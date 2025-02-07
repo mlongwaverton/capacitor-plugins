@@ -22,6 +22,7 @@ export enum Directory {
    * @since 1.0.0
    */
   Documents = 'DOCUMENTS',
+  Downloads = 'DOWNLOADS',
 
   /**
    * The Data directory.

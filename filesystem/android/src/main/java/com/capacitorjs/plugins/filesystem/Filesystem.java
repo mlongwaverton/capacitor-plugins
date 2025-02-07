@@ -210,6 +210,8 @@ public class Filesystem {
     public File getDirectory(String directory) {
         Context c = this.context;
         switch (directory) {
+            case "DOWNLOADS":
+                return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
             case "DOCUMENTS":
                 return Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
             case "DATA":
