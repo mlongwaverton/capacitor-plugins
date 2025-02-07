@@ -1,10 +1,14 @@
 package com.capacitorjs.plugins.filesystem;
 
+import android.app.DownloadManager;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.MediaStore;
 import android.util.Base64;
 import com.capacitorjs.plugins.filesystem.exceptions.CopyFailedException;
 import com.capacitorjs.plugins.filesystem.exceptions.DirectoryExistsException;
@@ -22,6 +26,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -346,63 +351,23 @@ public class Filesystem {
         String directory = call.getString("directory", Environment.DIRECTORY_DOWNLOADS);
 
         final URL url = new URL(urlString);
-        final File file = getFileObject(path, directory);
+        //final File file = getFileObject(path, directory);
 
-        HttpRequestHandler.HttpURLConnectionBuilder connectionBuilder = new HttpRequestHandler.HttpURLConnectionBuilder()
-            .setUrl(url)
-            .setMethod(method)
-            .setHeaders(headers)
-            .setUrlParams(params, shouldEncode)
-            .setConnectTimeout(connectTimeout)
-            .setReadTimeout(readTimeout)
-            .setDisableRedirects(disableRedirects)
-            .openConnection();
+        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(urlString));
 
-        CapacitorHttpUrlConnection connection = connectionBuilder.build();
+        request.setDescription(path);
+        request.addRequestHeader("Authorization", headers.getString("Authorization"));
+        request.setTitle(path);
+        request.setVisibleInDownloadsUi(true);
+        request.setMimeType("application/pdf");
+        request.allowScanningByMediaScanner();
+        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, path);
 
-        connection.setSSLSocketFactory(bridge);
-
-        InputStream connectionInputStream = connection.getInputStream();
-        FileOutputStream fileOutputStream = new FileOutputStream(file, false);
-
-        String contentLength = connection.getHeaderField("content-length");
-        int bytes = 0;
-        int maxBytes = 0;
-
-        try {
-            maxBytes = contentLength != null ? Integer.parseInt(contentLength) : 0;
-        } catch (NumberFormatException ignored) {}
-
-        byte[] buffer = new byte[1024];
-        int len;
-
-        // Throttle emitter to 100ms so it doesn't slow down app
-        long lastEmitTime = System.currentTimeMillis();
-        long minEmitIntervalMillis = 100;
-
-        while ((len = connectionInputStream.read(buffer)) > 0) {
-            fileOutputStream.write(buffer, 0, len);
-
-            bytes += len;
-
-            if (progress && null != emitter) {
-                long currentTime = System.currentTimeMillis();
-                if (currentTime - lastEmitTime > minEmitIntervalMillis) {
-                    emitter.emit(bytes, maxBytes);
-                    lastEmitTime = currentTime;
-                }
-            }
-        }
-
-        if (progress && null != emitter) {
-            emitter.emit(bytes, maxBytes);
-        }
-
-        connectionInputStream.close();
-        fileOutputStream.close();
+        ((DownloadManager)context.getSystemService(Context.DOWNLOAD_SERVICE)).enqueue(request);
 
         JSObject ret = new JSObject();
-        ret.put("path", file.getAbsolutePath());
+        ret.put("path", "");
         return ret;
     }
 
