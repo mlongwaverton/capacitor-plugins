@@ -1,5 +1,5 @@
 {
-  "name": "@capacitor/filesystem",
+  "name": "@capacitor/filesystem-wav",
   "version": "7.0.0",
   "description": "The Filesystem API provides a NodeJS-like API for working with files on the device.",
   "main": "dist/plugin.cjs.js",
@@ -79,6 +79,7 @@
     }
   },
   "publishConfig": {
-    "access": "public"
+    "provenance": false,
+    "access": "restricted"
   }
 }
