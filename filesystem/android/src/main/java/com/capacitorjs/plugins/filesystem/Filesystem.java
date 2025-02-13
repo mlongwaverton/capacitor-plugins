@@ -361,7 +361,12 @@ public class Filesystem {
         request.addRequestHeader("Authorization", headers.getString("Authorization"));
         request.setTitle(path);
         request.setVisibleInDownloadsUi(true);
-        urlString.contains("csv") ? request.setMimeType("text/csv") : request.setMimeType("application/pdf");
+        if (urlString.contains("csv")) {
+            request.setMimeType("text/csv");
+        }
+        else {
+            request.setMimeType("application/pdf");
+        }
         request.allowScanningByMediaScanner();
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
         request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, path);
