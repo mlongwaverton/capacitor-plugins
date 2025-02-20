@@ -361,7 +361,7 @@ public class Filesystem {
         request.addRequestHeader("Authorization", headers.getString("Authorization"));
         request.setTitle(path);
         request.setVisibleInDownloadsUi(true);
-        if (path.contains(".csv")) {
+        if (path.endsWith(".csv")) {
             request.setMimeType("text/csv");
         }
         else {
